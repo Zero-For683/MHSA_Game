@@ -1,43 +1,8 @@
-'''
-Program idea:
 
-New users get small amount of money and a starter ship. 
-The user picks a destination to take tourists to for money (moon, mercery, venus, etc)
-
-Expiditions to those destinations give you money, which you can shop for better parts, or better ships
-
-More expeditions give you more rep, which give you more tourists
-
-
------------------------------------------------------------------
-
-
-DELEGATIONS:
-1. Build an "expedition" class and create objects for every planet (including our moon for starter ships)m
-planet name, distance, +rep which = how many tourists to add to current profile, - czedrik got this 
-
-2. Build a "ship" class that has some basic stat attributes that you can upgrade with methods
-default name, fuel cap, speed, capacity
-add method to upgrade fuel, speed and capacity
-fuel capacity * speed = range / tourist capacity /
-
-3. Build a "Profile" class that will update as you get more "reputation" (more reputation == more tourists on each expidition)
-We can try saving this to a file so we can save game-state
-name, rep, current money, ship assigned, default tourist count.
-
-4. Build a while loop for game-state (we'll build this last to determine the flow of the game, and build ASCII art)
-while option != 0
-if option 1 = Begin mission -> pick destination -> passengers -> launch -> award money -> loop back to main menu?
-elif option 2 = Upgrade Ship -> pick part -> update player_ship -> loop back to main menu
-elif option 3 = Save Game -> save state
-elif option 4 = New Game? -> confirm -> wipe memory
-else invalid option
-
-'''
 
 
 from profile import user_profile, Profile
-from ship import ship1, ship2, ship3, Ship
+from ship import Ship
 from expedition import moon, mars, jupiter, Expedition # Add in more planets as necessary
 from ascii_animations import *
 
