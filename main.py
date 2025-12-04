@@ -70,7 +70,6 @@ def new_player(profile):
     print(f"Successful expeditions give you cash and reputation")
     print(f"Reputation attracts more tourists to fill your spaceships on future expeditions!")
     print(f"Cash can be used to upgrade your spaceship to embark to more exotic planets")
-    print(f"Be careful what planets you embark on. If your ship isnt good enough, you'll end up leaving your ship and all the tourists in an endless horrific void never to be seen again")
     print("=" * 30, "  TUTORIAL  ", "=" * 30)
     print("Press any key to continue...")
     input()
@@ -87,11 +86,12 @@ def load_save(save_file):
 def main_menu(profile):
     """Show the main menu and return the player's choice."""
     print("\n" * 100)
+    build_animation(winter_home)
     print("=" * 30, "  MAIN MENU  ", "=" * 30)
     print(f"Commander:   {profile.name}")
     print(f"Money:       {profile.money}")
     print(f"Reputation:  {profile.reputation}")
-    print(f"Tourists:    {profile.tourists}")
+    print(f"Tourists:    {profile.tourists}\n\n")
     print("1) Choose mission")
     print("2) Upgrade ship")
     print("0) Save & Quit")
@@ -103,7 +103,7 @@ def choose_destination():
     '''When called, you get the option to choose the available missions -- Czedrik Draft'''   
     print("\n" * 100)
     print("=" * 30, "  MISSION SELECTOR  ", "=" * 30)
-    
+    build_animation(solar_system_big)
     print("Available Destinations:")
     for i, obj in enumerate(Expedition._expedition, start=1):
         print(f"{1}. {obj.planet_name}")
@@ -147,6 +147,7 @@ def run_mission(profile, ship, expedition):
 def upgrade_ship(profile_ship):
     while True:
         print("\n" * 100)
+        build_animation(spaceship)
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30)
 
         print(f"Which ship component would you like to upgrade?\n\n")
