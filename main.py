@@ -105,14 +105,14 @@ def choose_destination():
     print("=" * 30, "  MISSION SELECTOR  ", "=" * 30)
     build_animation(solar_system_big)
     print("Available Destinations:")
-    for i, obj in enumerate(Expedition._expedition, start=1):
+    for i, obj in enumerate(Expedition.all_expedition, start=1):
         print(f"{1}. {obj.planet_name}")
 
     while True:
         try:
             choice = int(input("\nEnter the number of your choice: "))
-            if 1 <= choice <= len(Expedition._expedition):
-                selected_destination = Expedition._expedition[choice - 1]
+            if 1 <= choice <= len(Expedition.all_expedition):
+                selected_destination = Expedition.all_expedition[choice - 1]
                 print(f"Destination Selected: {selected_destination.planet_name}")
                 return selected_destination
             else:
