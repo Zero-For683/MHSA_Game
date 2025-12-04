@@ -6,12 +6,12 @@ Created on Wed Dec  3 13:05:18 2025
 """
 
 class Ship:
-    def __init__(self, name, capacity, fuel_range, travel_speed):
+    def __init__(self, name="New Ship", capacity=10, fuel_range=250, travel_speed=5):
         self.name = name
         self.capacity = capacity
         self.fuel_range = fuel_range
         self.travel_speed = travel_speed
-
+        
         # Upgrade levels
         self.capacity_level = 1
         self.fuel_level = 1
@@ -26,11 +26,15 @@ class Ship:
         self.max_level = 10
 
         # Player credits (money) 
-        self.credits = 200
+        self.credits = 100
     
     def get_status(self):
         print(f"{self.name} current stats are capacity is {self.capacity}, fuel range is {self.fuel_range} and speed is {self.travel_speed}")
     
+    def rename_ship(self, new_name):
+        self.name = new_name
+        print(f"Ship renamed to {self.name}")    
+        
     def upgrade_fuel(self):
         if self.fuel_level >= self.max_level:
             print("Fuel range is already max level!")
@@ -45,7 +49,7 @@ class Ship:
 
         # Upgrade stat
         self.fuel_level += 1
-        self.fuel_range += 250
+        self.fuel_range += 750
 
         # Increase next upgrade cost
         self.fuel_cost = int(self.fuel_cost * 1.5)
@@ -66,7 +70,7 @@ class Ship:
 
         self.credits -= self.speed_cost
         self.speed_level += 1
-        self.travel_speed += 500
+        self.travel_speed += 15
         self.speed_cost = int(self.speed_cost * 1.5)
 
         print(f"{self.name}'s speed upgraded to Level {self.speed_level}.")
@@ -93,14 +97,10 @@ class Ship:
         print(f"Credits remaining: {self.credits}")
         print(f"Next capacity cost: {self.capacity_cost}")
 
-ship1 = Ship("Hella", 50, 2000, 8000) # Give some starter ship options
-ship2 = Ship("Option2", 50, 2000, 8000)
-ship3 = Ship("Option3", 50, 2000, 8000)
+ship1 = Ship("Hella", 50, 2000, 8000)
 
-
-'''
 ship1.upgrade_capacity()
 ship1.upgrade_fuel()
 ship1.upgrade_speed()        
 ship1.get_status()        
-    '''
+    
