@@ -39,42 +39,71 @@ else invalid option
 from profile import user_profile, Profile
 from ship import ship1, ship2, ship3, Ship
 from expedition import moon, mars, jupiter, Expedition # Add in more planets as necessary
+from ascii_animations import *
+
+
 import time
 import os
 
-DESTINATIONS = {
-    "1": moon,
-    "2": mars,
-    "3": jupiter
-}
+
+#########################################################################################
+
 
 def new_player(profile):
-    '''Determines if there is a new player and gives them the rundown'''
-    print(f"Hello, what is your name?\n")
+    '''Runs to initiate a new save game'''
+    build_animation(solar_system)
+    print(f"\n\nI think I see a new player approaching...\n")
+    time.sleep(3)
+    print(f"What is your name my fellow capitalist?")
     username = input()
     profile.name = username
-    print(f"I hope you're ready for an exciting adventure {profile.name}")
-    print(f"What ship would you like to have to start your business off?")
+    print(f"I hope you're ready for an exciting adventure {profile.name}...")
+    time.sleep(3)
+    print("\n" * 100)
 
 
+    build_animation(saturn)
+    print("\n\n\n")
+    print("=" * 30, "  TUTORIAL  ", "=" * 30)
+    print(f"We'll give you a spaceship to start off with, free of charge!")
+    print(f"In order to progress, you'll need to take tourists around our solar system!")
+    print(f"Successful expeditions give you cash and reputation")
+    print(f"Reputation attracts more tourists to fill your spaceships on future expeditions!")
+    print(f"Cash can be used to upgrade your spaceship to embark to more exotic planets")
+    print(f"Be careful what planets you embark on. If your ship isnt good enough, you'll end up leaving your ship and all the tourists in an endless horrific void never to be seen again")
+    print("=" * 30, "  TUTORIAL  ", "=" * 30)
+    print("Press any key to continue...")
+    input()
 
+
+def save_game(profile):
+    '''When the user quits this function will create a <profile_name>.json file'''
+    pass
+
+def load_save(save_file):
+    '''Loads a save file when called'''
+    pass
 
 def main_menu(profile):
     """Show the main menu and return the player's choice."""
-    print("\n================================")
+    print("\n" * 100)
+    print("=" * 30, "  MAIN MENU  ", "=" * 30)
     print(f"Commander:   {profile.name}")
     print(f"Money:       {profile.money}")
     print(f"Reputation:  {profile.reputation}")
     print(f"Tourists:    {profile.tourists}")
-    print("================================")
     print("1) Choose mission")
     print("2) Upgrade ship")
     print("0) Save & Quit")
+    print("=" * 30, "  MAIN MENU  ", "=" * 30)
     choice = input("Choose an option: ")
     return choice.strip()
 
 def choose_destination():
     '''When called, you get the option to choose the available missions -- Czedrik Draft'''   
+    print("\n" * 100)
+    print("=" * 30, "  MISSION SELECTOR  ", "=" * 30)
+    
     print("Available Destinations:")
     for i, obj in enumerate(Expedition._expedition, start=1):
         print(f"{1}. {obj.planet_name}")
@@ -90,6 +119,7 @@ def choose_destination():
                 print("Invalid choice. Please enter a valid number.")
         except ValueError:
             print("Invalid. Please enter a number.")  
+
 
 
 def run_mission(profile, ship, expedition):
@@ -114,16 +144,18 @@ def run_mission(profile, ship, expedition):
     profile.reputation += expedition.reputation_gain
     profile.tourists += expedition.tourist_something   # if you want rep -> more tourists
 
-
 def upgrade_ship(profile_ship):
     while True:
+        print("\n" * 100)
+        print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30)
 
-        print(f"Which ship component would you like to upgrade?")
+        print(f"Which ship component would you like to upgrade?\n\n")
         print(f"Enter 1 to check your current ship status")
         print(f"Enter 2 to upgrade your ships holding capacity")
         print(f"Enter 3 to upgrade your ships fuel range")
         print(f"Enter 4 to upgrade your ships speed")
         print(f"Enter 0 to go back to main menu")
+        print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30, "\n\n")
         pick = int(input("Pick an option: "))
 
         if pick < 0 or pick > 4:
@@ -132,24 +164,47 @@ def upgrade_ship(profile_ship):
 
         if pick == 1:
             profile_ship.get_status()
+            time.sleep(5)
         elif pick == 2:
             profile_ship.upgrade_capacity()
+            time.sleep(5)
         elif pick == 3:
             profile_ship.upgrade_fuel()
-            
+            time.sleep(5)
         elif pick == 4:
             profile_ship.upgrade_speed()
+            time.sleep(5)
         elif pick == 0:
             break
     
-
 def main():
     profile = user_profile
 
+
+    try:
+        os.mkdir("save_files")
+    except FileExistsError:
+        pass
+
+    if any(os.path.isfile(os.path.join("save_files", f)) for f in os.listdir("save_files")):
+        print("Would you like to create a new save, or load an existing playthrough?")
+        print("1) Load save")
+        print("2) Create new save")
+        save = int(input("> "))
+
+        if save == 1:
+            load_save()
+        elif save == 2:
+            new_player(profile)
+    else:
+        # No save files found
+        new_player(profile)
+
+
+
+
     player_ship = Ship(name="Starter", capacity=50, fuel_range=2000, travel_speed=8000)
     profile.ship = player_ship
-
-    new_player(profile)
 
     # Main game loop
     while True:

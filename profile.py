@@ -14,6 +14,4 @@ class Profile():
         self.tourists = tourists
         self.ship = ship
         self.money = money
-        
 user_profile = Profile(name=str(input()), reputation=1, tourists=5, ship="Default", money=100)
-
