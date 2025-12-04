@@ -11,6 +11,7 @@ class Ship:
         self.capacity = capacity
         self.fuel_range = fuel_range
         self.travel_speed = travel_speed
+        self.ship_cost = capacity + travel_speed * fuel_range
         
         # Upgrade levels
         self.capacity_level = 1
@@ -97,10 +98,12 @@ class Ship:
         print(f"Credits remaining: {self.credits}")
         print(f"Next capacity cost: {self.capacity_cost}")
 
-ship1 = Ship("Hella", 50, 2000, 8000)
 
-ship1.upgrade_capacity()
-ship1.upgrade_fuel()
-ship1.upgrade_speed()        
-ship1.get_status()        
-    
+
+
+Hella = Ship("Hella",  50,   2000,  8000) # Starter
+Omega = Ship("Omega",  100,  4000,  16000) # Beginner
+Alpha = Ship("Alpha",  200,  8000,  32000) # Intermediate
+Sigma = Ship("Sigma",  400,  16000, 64000) # End-game
+
+ship_shop = [Hella, Omega, Alpha, Sigma]

@@ -12,7 +12,7 @@ class Expedition:
     
     def __init__(self, planet_name, distance, cash_reward, reputation_gain, tourist_something):
            self.planet_name = planet_name
-           self.distance = distance #in light-seconds from earth
+           self.distance = distance #in MHSA™ Distance Units
            self.cash_reward = cash_reward
            self.reputation_gain = reputation_gain
            self.tourist_something = tourist_something
