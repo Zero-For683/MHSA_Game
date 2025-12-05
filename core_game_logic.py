@@ -1,17 +1,20 @@
+import math
+from random import randint
 from ascii_animations import *
 import time
 from expedition import Expedition
 from ship import *
+from user_profile import Profile
 
 def main_menu(profile):
     """Show the main menu and return the player's choice."""
     print("\n" * 100)
     build_animation(winter_home)
     print("=" * 30, "  MAIN MENU  ", "=" * 30)
-    print(f"Commander:   {profile.name}")
-    print(f"Money:       {profile.money}")
-    print(f"Reputation:  {profile.reputation}")
-    print(f"Tourists:    {profile.tourists}\n\n")
+    print(f"Commander:        {profile.name}")
+    print(f"Money:            {profile.money}")
+    print(f"Reputation:       {profile.reputation}")
+    print(f"Tourist Serviced: {profile.tourists}\n\n")
     print("1) Choose mission")
     print("2) Upgrade ship")
     print("0) Save & Quit")
@@ -30,7 +33,9 @@ def choose_destination():
 
     while True:
         try:
-            choice = int(input("\nEnter the number of your choice: "))
+            choice = int(input("\nEnter the number of your destination or [0] to return to main menu: "))
+            if choice == 0:
+                break
             if 1 <= choice <= len(Expedition.all_expeditions):
                 selected_destination = Expedition.all_expeditions[choice - 1]
                 print(f"Destination Selected: {selected_destination.planet_name}")
@@ -40,28 +45,53 @@ def choose_destination():
         except ValueError:
             print("Invalid. Please enter a number.")  
 
-def run_mission(profile, ship, expedition):
-    """Runs the chosen mission."""
+
+def is_preflight_check_pass(ship, expedition):
     if expedition is None:
         print("Invalid destination. Mission aborted.")
-        return
+        return False
 
     # Simple range check: can this ship make a round trip?
-    if ship.capacity * ship.travel_speed < expedition.distance * 2:
+    if ship.fuel_range * ship.travel_speed < expedition.distance * 2:
         print(
             "Your ship isn't strong enough for this expedition. "
             "Say goodbye to your tourists and prized ship..."
         )
         # We can add penalties here if we want to for random button mashing
+        return False
+    return True
+
+def calc_passenger_onboard(profile: Profile, ship: Ship) -> int:
+    """Determine how many passengers got onboard based on current player's reputation"""
+    
+    rep_level = profile.get_reputation_level()
+    
+    # use math ceiling because we want at least 1 passenger if rng of min capacity returns zero
+    min_capacity = math.ceil(ship.capacity * (rep_level.min_rng / 100)) 
+    max_capacity = math.floor(ship.capacity * (rep_level.max_rng / 100))
+
+    return randint(min_capacity, max_capacity)
+
+
+def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
+    """Runs the chosen mission."""
+
+    if not is_preflight_check_pass(ship, expedition):
         return
 
+    # Calculatiing
+    tourist_onboard = calc_passenger_onboard(profile, ship)
+    
+    print(f"\nBased on your reputation, {tourist_onboard} decided to join this mission. You had {ship.capacity - tourist_onboard} seats left open.")
+    input("\n Press Enter to continue... ")
+
+    gained_reputation = profile.increase_reputation(tourist_onboard)
+    gained_money = profile.increase_money(expedition.distance, tourist_onboard)
+    profile.tourists += tourist_onboard   # of tourists ever serviced
+
     print(f"\nYou order your captain to embark on a journey to {expedition.planet_name} with the tourists!")
-    print(f"Rewards:\n  Money:       {expedition.cash_reward}\n  Reputation:  {expedition.reputation_gain}")
-
-    profile.money += expedition.cash_reward
-    profile.reputation += expedition.reputation_gain
-    profile.tourists += expedition.tourist_something   # if you want rep -> more tourists
-
+    print(f"Rewards:\n  Money:       +{gained_money}\n  Reputation:  +{gained_reputation}")
+    input("\n Press Enter to continue...")
 
 
 def open_ship_shop(profile, ship_list):
@@ -172,5 +202,3 @@ def shop_menu(profile, profile_ship):
         else:
             print(f"Invalid option BOZO. Pick again")
             continue
-
-

@@ -11,10 +11,10 @@ class Ship:
         self.capacity = capacity
         self.fuel_range = fuel_range
         self.travel_speed = travel_speed
-        self.ship_cost = capacity + travel_speed * fuel_range
+        self.ship_cost = capacity * (travel_speed + fuel_range) #TODO Czedrik will need to Balance more
         
         # Upgrade levels
-        self.capacity_level = 1
+        self.capacity_level = 1 
         self.fuel_level = 1
         self.speed_level = 1
 
@@ -24,7 +24,7 @@ class Ship:
         self.speed_cost = 100
 
         # Max level for each stat
-        self.max_level = 10
+        self.max_level = 3 #TODO MAX TIER IS 3
 
         # Player credits (money) 
         self.credits = 100
@@ -48,12 +48,12 @@ class Ship:
         # Deduct cost
         self.credits -= self.fuel_cost
 
-        # Upgrade stat
-        self.fuel_level += 1
+        # Upgrade stat 
+        self.fuel_level += 1 #TODO Tweak Upgrade Levels based on 25%/50%/100% of base ship's stats
         self.fuel_range += 750
 
         # Increase next upgrade cost
-        self.fuel_cost = int(self.fuel_cost * 1.5)
+        self.fuel_cost = int(self.fuel_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
 
         print(f"{self.name}'s fuel range upgraded to Level {self.fuel_level}.")
         print(f"New fuel range: {self.fuel_range}")
@@ -72,7 +72,7 @@ class Ship:
         self.credits -= self.speed_cost
         self.speed_level += 1
         self.travel_speed += 15
-        self.speed_cost = int(self.speed_cost * 1.5)
+        self.speed_cost = int(self.speed_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
 
         print(f"{self.name}'s speed upgraded to Level {self.speed_level}.")
         print(f"New speed: {self.travel_speed}")
@@ -91,7 +91,7 @@ class Ship:
         self.credits -= self.capacity_cost
         self.capacity_level += 1
         self.capacity += 10
-        self.capacity_cost = int(self.capacity_cost * 1.5)
+        self.capacity_cost = int(self.capacity_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
 
         print(f"{self.name}'s capacity upgraded to Level {self.capacity_level}.")
         print(f"New capacity: {self.capacity}")
@@ -101,9 +101,9 @@ class Ship:
 
 
 
-Hella = Ship("Hella",  50,   2000,  8000) # Starter
-Omega = Ship("Omega",  100,  4000,  16000) # Beginner
-Alpha = Ship("Alpha",  200,  8000,  32000) # Intermediate
-Sigma = Ship("Sigma",  400,  16000, 64000) # End-game
+Hella = Ship("Hella",  10,   250,  500) # Starter
+Omega = Ship("Omega",  50,  500,  1500) # Beginner
+Alpha = Ship("Alpha",  200,  1000,  3000) # Intermediate
+Sigma = Ship("Sigma",  500,  2000, 6000) # End-game
 
 ship_shop = [Hella, Omega, Alpha, Sigma]

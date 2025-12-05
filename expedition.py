@@ -10,23 +10,20 @@ Moon -- planet_name == moon, distance, 500, cash_reward == 50, reputation_gain =
 class Expedition:
     all_expeditions = []
     
-    def __init__(self, planet_name, distance, cash_reward, reputation_gain, tourist_something):
+    def __init__(self, planet_name, distance):
            self.planet_name = planet_name
-           self.distance = distance #in MHSA™ Distance Units
-           self.cash_reward = cash_reward
-           self.reputation_gain = reputation_gain
-           self.tourist_something = tourist_something
+           self.distance = distance #in MH™ Distance Units (Earth to Destination in AU x 100,000)
            Expedition.all_expeditions.append(self)
            
     def __str__(self):
         return f" {self.planet_name}"
     
-moon = Expedition(planet_name="Moon", distance=25, cash_reward=10, reputation_gain=1, tourist_something=25)
-venus = Expedition(planet_name="Venus", distance=2800, cash_reward=10, reputation_gain=1, tourist_something=25)
-mars = Expedition(planet_name="Mars", distance=5200, cash_reward=25, reputation_gain=3, tourist_something=25)
-mercury = Expedition(planet_name="Mercury", distance=6100, cash_reward=25, reputation_gain=3, tourist_something=25)
-asteroid_belt = Expedition(planet_name="Asteroid Belt", distance=15000, cash_reward=25, reputation_gain=3, tourist_something=25)
-jupiter = Expedition(planet_name="Jupiter", distance=42000, cash_reward=50, reputation_gain=5, tourist_something=25)
-saturn = Expedition(planet_name="Saturn", distance=85200, cash_reward=50, reputation_gain=5, tourist_something=25)
-uranus = Expedition(planet_name="Uranus", distance=180200, cash_reward=50, reputation_gain=5, tourist_something=25)
-neptune = Expedition(planet_name="Neptune", distance=290000, cash_reward=50, reputation_gain=5, tourist_something=25)
+moon = Expedition(planet_name="Moon", distance=250)
+venus = Expedition(planet_name="Venus", distance=28000)
+mars = Expedition(planet_name="Mars", distance=52000)
+mercury = Expedition(planet_name="Mercury", distance=61000)
+asteroid_belt = Expedition(planet_name="Asteroid Belt", distance=150000)
+jupiter = Expedition(planet_name="Jupiter", distance=420000)
+saturn = Expedition(planet_name="Saturn", distance=852000)
+uranus = Expedition(planet_name="Uranus", distance=1802000)
+neptune = Expedition(planet_name="Neptune", distance=2900000)
