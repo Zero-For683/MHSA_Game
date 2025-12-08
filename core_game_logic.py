@@ -5,6 +5,8 @@ import time
 from expedition import Expedition
 from ship import *
 from user_profile import Profile
+import threading
+import time
 
 def main_menu(profile):
     """Show the main menu and return the player's choice."""
@@ -74,24 +76,117 @@ def calc_passenger_onboard(profile: Profile, ship: Ship) -> int:
 
 
 def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
-    """Runs the chosen mission."""
+    """Runs the chosen mission asynchronously with a tiny in-terminal animation."""
 
+    import threading
+    import time
+
+    # If no destination was actually selected, just bail.
+    if expedition is None:
+        print("No destination selected. Mission aborted.")
+        return
+
+    # If this ship is already away, show a tiny status animation and block sending it again.
+    if getattr(ship, "_mission_active", False):
+        dest = getattr(ship, "_mission_destination", "somewhere")
+        eta = getattr(ship, "_mission_eta", None)
+
+        print(f"\n{ship.name} is already on a mission to {dest}.")
+
+        spinner = "|/-\\"
+        if eta is not None:
+            # Quick, non-blocking style status check (~6 seconds max)
+            for i in range(12):
+                remaining = max(0, int(eta - time.time()))
+                frame = spinner[i % len(spinner)]
+                print(
+                    f"\r[{frame}] Mission in progress... approx {remaining:2d}s remaining ",
+                    end="",
+                    flush=True,
+                )
+                time.sleep(0.5)
+            print()
+        else:
+            print("Mission in progress...")
+
+        input("Press Enter to return to the menu...")
+        return
+
+    # Normal preflight check
     if not is_preflight_check_pass(ship, expedition):
         return
 
-    # Calculatiing
+    # Determine how many passengers board
     tourist_onboard = calc_passenger_onboard(profile, ship)
-    
-    print(f"\nBased on your reputation, {tourist_onboard} decided to join this mission. You had {ship.capacity - tourist_onboard} seats left open.")
-    input("\n Press Enter to continue... ")
+    print(
+        f"\nBased on your reputation, {tourist_onboard} decided to join this mission. "
+        f"You had {ship.capacity - tourist_onboard} seats left open."
+    )
+    input("\nPress Enter to launch the mission... ")
 
-    gained_reputation = profile.increase_reputation(tourist_onboard)
-    gained_money = profile.increase_money(expedition.distance, tourist_onboard)
-    profile.tourists += tourist_onboard   # of tourists ever serviced
+    # Compute a rough mission duration based on distance and ship speed
+    # travel_units grows with distance and shrinks with speed
+    travel_units = expedition.distance / max(1, ship.travel_speed)
+    # Clamp to something reasonable in real seconds
+    mission_duration = max(10, min(120, int(travel_units / 5)))
+
+    # Mark ship as "away"
+    ship._mission_active = True
+    ship._mission_destination = expedition.planet_name
+    ship._mission_eta = time.time() + mission_duration
 
     print(f"\nYou order your captain to embark on a journey to {expedition.planet_name} with the tourists!")
-    print(f"Rewards:\n  Money:       +{gained_money}\n  Reputation:  +{gained_reputation}")
-    input("\n Press Enter to continue...")
+    print(f"{ship.name} will be away for about {mission_duration} seconds (round trip).")
+    print("You can visit the shop or main menu while the mission runs in the background.\n")
+
+    def mission_worker():
+        spinner = "|/-\\"
+        i = 0
+
+        # Tiny background animation loop while the mission is in flight
+        while time.time() < ship._mission_eta and getattr(ship, "_mission_active", False):
+            remaining = max(0, int(ship._mission_eta - time.time()))
+            frame = spinner[i % len(spinner)]
+            # One-line status that will occasionally interleave with menu output
+            print(
+                f"\r[{frame}] {ship.name} en route to {expedition.planet_name} | ETA: {remaining:2d}s ",
+                end="",
+                flush=True,
+            )
+            i += 1
+            time.sleep(0.5)
+
+        # Clean up the animation line
+        print("\r", end="")
+
+        # If something else cancelled the mission, don't apply rewards
+        if not getattr(ship, "_mission_active", False):
+            return
+
+        # Apply rewards when the mission actually completes
+        gained_reputation = profile.increase_reputation(tourist_onboard)
+        gained_money = profile.increase_money(expedition.distance, tourist_onboard)
+        profile.tourists += tourist_onboard
+
+        # Clear mission state
+        ship._mission_active = False
+        ship._mission_eta = None
+        ship._mission_destination = None
+
+        # Final mission summary
+        print(f"\n\nMission complete! {ship.name} has returned from {expedition.planet_name}.")
+        print(f"Tourists delivered: {tourist_onboard}")
+        print(f"Rewards:\n  Money:       +{gained_money}\n  Reputation:  +{gained_reputation}\n")
+
+    # Start the background mission thread and immediately return control to main loop
+    mission_thread = threading.Thread(target=mission_worker, daemon=True)
+    ship._mission_thread = mission_thread
+    mission_thread.start()
+
+    input("Press Enter to return to the menu while your ship is on mission...")
+
+
+
 
 
 def open_ship_shop(profile, ship_list):
