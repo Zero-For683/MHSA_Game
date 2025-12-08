@@ -24,7 +24,7 @@ class Ship:
         self.speed_cost = 100
 
         # Max level for each stat
-        self.max_level = 3 #TODO MAX TIER IS 3
+        self.max_level = 3 
 
         # Player credits (money) 
         self.credits = 100
@@ -35,68 +35,86 @@ class Ship:
     def rename_ship(self, new_name):
         self.name = new_name
         print(f"Ship renamed to {self.name}")    
-        
+
+    def get_upgrade_percent(self, level):
+            if level == 1:
+                return 0.25
+            elif level == 2:
+                return 0.50
+            elif level == 3:
+                return 1.00
+
+    def get_upgrade_cost(self, level):
+        return int(0.65 * self.base_cost * level)
+                        
     def upgrade_fuel(self):
         if self.fuel_level >= self.max_level:
-            print("Fuel range is already max level!")
+            print("Fuel range already maxed!")
             return
 
-        if self.credits < self.fuel_cost:
+        cost = self.get_upgrade_cost(self.fuel_level)
+        if self.credits < cost:
             print("Not enough credits!")
             return
+        
+        # Pay cost
+        self.credits -= cost
 
-        # Deduct cost
-        self.credits -= self.fuel_cost
+        # Apply upgrade
+        percent = self.get_upgrade_percent(self.fuel_level)
+        self.fuel_range = int(self.base_fuel_range * (1 + percent))
+        self.fuel_level += 1
 
-        # Upgrade stat 
-        self.fuel_level += 1 #TODO Tweak Upgrade Levels based on 25%/50%/100% of base ship's stats
-        self.fuel_range += 750
-
-        # Increase next upgrade cost
-        self.fuel_cost = int(self.fuel_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
-
-        print(f"{self.name}'s fuel range upgraded to Level {self.fuel_level}.")
-        print(f"New fuel range: {self.fuel_range}")
-        print(f"Credits remaining: {self.credits}")
-        print(f"Next upgrade cost: {self.fuel_cost}")
+        print(f"Fuel upgraded to Level {self.fuel_level-1}")
+        print(f"New Fuel Range: {self.fuel_range}")
+        print(f"Credits left: {self.credits}")
+        print(f"Next upgrade cost: {self.get_upgrade_cost(self.fuel_level) if self.fuel_level <= 3 else 'MAX'}")
 
     def upgrade_speed(self):
         if self.speed_level >= self.max_level:
-            print("Speed is already max level!")
+            print("Speed already maxed!")
             return
 
-        if self.credits < self.speed_cost:
+        cost = self.get_upgrade_cost(self.speed_level)
+        if self.credits < cost:
             print("Not enough credits!")
             return
 
-        self.credits -= self.speed_cost
-        self.speed_level += 1
-        self.travel_speed += 15
-        self.speed_cost = int(self.speed_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
+        # Pay cost
+        self.credits -= cost
 
-        print(f"{self.name}'s speed upgraded to Level {self.speed_level}.")
-        print(f"New speed: {self.travel_speed}")
-        print(f"Credits remaining: {self.credits}")
-        print(f"Next speed cost: {self.speed_cost}")
+        # Apply upgrade
+        percent = self.get_upgrade_percent(self.speed_level)
+        self.travel_speed = int(self.base_speed * (1 + percent))
+        self.speed_level += 1
+
+        print(f"Speed upgraded to Level {self.speed_level-1}")
+        print(f"New Speed: {self.travel_speed}")
+        print(f"Credits left: {self.credits}")
+        print(f"Next upgrade cost: {self.get_upgrade_cost(self.speed_level) if self.speed_level <= 3 else 'MAX'}")
 
     def upgrade_capacity(self):
         if self.capacity_level >= self.max_level:
-            print("Capacity is already max level!")
+            print("Capacity already maxed!")
             return
-
-        if self.credits < self.capacity_cost:
+        
+        cost = self.get_upgrade_cost(self.capacity_level)
+        if self.credits < cost:
             print("Not enough credits!")
             return
 
-        self.credits -= self.capacity_cost
-        self.capacity_level += 1
-        self.capacity += 10
-        self.capacity_cost = int(self.capacity_cost * 1.5) #TODO COST = 65% OF BASE_SHIP COST * CURRENT UPGRADE LEVEL
+        # Pay cost
+        self.credits -= cost
 
-        print(f"{self.name}'s capacity upgraded to Level {self.capacity_level}.")
-        print(f"New capacity: {self.capacity}")
-        print(f"Credits remaining: {self.credits}")
-        print(f"Next capacity cost: {self.capacity_cost}")
+        # Apply upgrade
+        percent = self.get_upgrade_percent(self.capacity_level)
+        self.capacity = int(self.base_capacity * (1 + percent))
+        self.capacity_level += 1
+
+        print(f"Capacity upgraded to Level {self.capacity_level-1}")
+        print(f"New Capacity: {self.capacity}")
+        print(f"Credits left: {self.credits}")
+        print(f"Next upgrade cost: {self.get_upgrade_cost(self.capacity_level) if self.capacity_level <= 3 else 'MAX'}")
 
 
 
