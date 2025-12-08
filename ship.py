@@ -12,7 +12,8 @@ class Ship:
         self.fuel_range = fuel_range
         self.travel_speed = travel_speed
         self.ship_cost = capacity * (travel_speed + fuel_range) #TODO Czedrik will need to Balance more
-        
+        self.base_cost = self.ship_cost
+
         # Upgrade levels
         self.capacity_level = 1 
         self.fuel_level = 1
