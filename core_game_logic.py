@@ -268,18 +268,32 @@ def shop_menu(profile, profile_ship):
         build_animation(spaceship)
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30)
 
-        print(f"Which ship component would you like to upgrade?\n\n")
-        print(f"1) check your current ship status\n")
-        print(f"2) upgrade your ships holding capacity")
-        print(f"3) upgrade your ships fuel range")
-        print(f"4) upgrade your ships speed")
-        print(f"5) Buy a new ship")
-        print(f"\n0) to go back to main menu")
-        print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30, "\n\n")
-        pick = int(input("Pick an option: "))
+        print("Which ship component would you like to upgrade?\n")
+        print("1) check your current ship status\n")
+        print("2) upgrade your ships holding capacity")
+        print("3) upgrade your ships fuel range")
+        print("4) upgrade your ships speed")
+        print("5) Buy a new ship")
+        print("\n0) to go back to main menu")
+        print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30, "\n")
 
+        # Safely read input
+        while True:
+            choice_str = input("Pick an option: ").strip()
+            if choice_str == "":
+                # Treat blank enter as "do nothing, re-show prompt"
+                print("Please enter a number from the menu.")
+                continue
+            try:
+                pick = int(choice_str)
+                break
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+                continue
+
+        # from here down, your existing logic:
         if pick == 1:
-            profile_ship.get_status()
+            profile_ship.check_stats()
             time.sleep(5)
         elif pick == 2:
             profile_ship.upgrade_capacity()
@@ -291,9 +305,8 @@ def shop_menu(profile, profile_ship):
             profile_ship.upgrade_speed()
             time.sleep(5)
         elif pick == 5:
-                open_ship_shop(profile, ship_shop)
+            open_ship_shop(profile, ship_shop)
         elif pick == 0:
             break
         else:
-            print(f"Invalid option BOZO. Pick again")
-            continue
+            print("Invalid option BOZO. Pick again")
