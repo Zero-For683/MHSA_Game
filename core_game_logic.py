@@ -153,18 +153,22 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
         # Tiny background animation loop while the mission is in flight
         while time.time() < ship._mission_eta and getattr(ship, "_mission_active", False):
             remaining = max(0, int(ship._mission_eta - time.time()))
-            frame = spinner[i % len(spinner)]
-            # One-line status that will occasionally interleave with menu output
-            print(
-                f"\r{MAGENTA}[{frame}] {ship.name} en route to {expedition.planet_name} | ETA: {remaining:2d}s {ENDCOLOR}",
-                end="",
-                flush=True,
-            )
-            i += 1
+
+            # Only draw the spinner if it's enabled
+            if getattr(ship, "_mission_show_spinner", True):
+                frame = spinner[i % len(spinner)]
+                print(
+                    f"\r{MAGENTA}[{frame}] {ship.name} en route to {expedition.planet_name} | ETA: {remaining:2d}s {ENDCOLOR}",
+                    end="",
+                    flush=True,
+                )
+                i += 1
+
             time.sleep(0.5)
 
         # Clean up the animation line
         print("\r", end="")
+
 
         # If something else cancelled the mission, don't apply rewards
         if not getattr(ship, "_mission_active", False):
@@ -185,13 +189,19 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
         print(f"Tourists Delivered: {tourist_onboard}")
         print(f"{YELLOW}Rewards:{ENDCOLOR}\n  {GREEN}Money:       +${gained_money:,.2f}{ENDCOLOR}\n  {CYAN}Reputation:  +{gained_reputation:.2f}%{ENDCOLOR}\n")
        
-    # Start the background mission thread and immediately return control to main loop
+    ship._mission_show_spinner = True
     mission_thread = threading.Thread(target=mission_worker, daemon=True)
     ship._mission_thread = mission_thread
     mission_thread.start()
 
+    # This prompt is still on the mission screen
     input(f"\nPress {RED}ENTER{ENDCOLOR} return to the menu...")
 
+    # Once we leave the mission screen, stop drawing the spinner so it
+    # doesn't interfere with menu input while the mission continues running
+    ship._mission_show_spinner = False
+    # Optional: wipe the spinner line
+    print("\r" + " " * 80 + "\r", end="")
 
 
 
@@ -240,10 +250,6 @@ def open_ship_shop(profile, ship_list):
         input(f"Press {RED}ENTER{ENDCOLOR} continue...")
 
 
-
-
-
-
 def choose_owned_ship(profile):
     """Let the player pick one of their owned ships. Returns a Ship or None."""
     if not getattr(profile, "ships", []):
@@ -271,9 +277,6 @@ def choose_owned_ship(profile):
             return profile.ships[idx - 1]
 
         print("Invalid choice, try again.")
-
-
-
 
 
 def shop_menu(profile: Profile, ship: Ship):

@@ -39,10 +39,8 @@ def new_player(profile):
     print(f"Press {RED}ENTER{ENDCOLOR} to continue...")
     input()
 
-
-
 def save_game(profile):
-    """Save the current profile (and all ships) to <profile_name>.json."""
+    """Save the current profile (and all ships) to save_files/<profile_name>.json."""
     # Serialize ships -> list of dicts
     ships_data = []
     for ship in getattr(profile, "ships", []):
@@ -51,9 +49,10 @@ def save_game(profile):
             "capacity": ship.capacity,
             "fuel_range": ship.fuel_range,
             "travel_speed": ship.travel_speed,
-            "capacity_level": ship.capacity_level,
-            "fuel_level": ship.fuel_level,
-            "speed_level": ship.speed_level,
+            "capacity_level": getattr(ship, "capacity_level", 1),
+            "fuel_level": getattr(ship, "fuel_level", 1),
+            # use the correct attribute name here
+            "travel_speed_level": getattr(ship, "travel_speed_level", 1),
             "capacity_cost": getattr(ship, "capacity_cost", 100),
             "fuel_cost": getattr(ship, "fuel_cost", 100),
             "speed_cost": getattr(ship, "speed_cost", 100),
@@ -78,9 +77,82 @@ def save_game(profile):
 
     print(f"Game saved as {filename}")
 
-
-
 def load_save():
+    """Let the user pick a save file from save_files/ and return a loaded Profile."""
+    if not os.path.isdir("save_files"):
+        print("No save files found.")
+        return None
+
+    files = [f for f in os.listdir("save_files") if f.endswith(".json")]
+    if not files:
+        print("No save files found.")
+        return None
+
+    print("\n" * 100)
+    print("\nAvailable saves:")
+    for i, fname in enumerate(files, start=1):
+        print(f"{i}) {fname}")
+
+    while True:
+        choice = input("> ").strip()
+        if not choice.isdigit():
+            print("Please enter a number.")
+            continue
+        idx = int(choice)
+        if 1 <= idx <= len(files):
+            selected = files[idx - 1]
+            break
+        print("Invalid choice, try again.")
+
+    filepath = os.path.join("save_files", selected)
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    # Rebuild ships list
+    ships: list[Ship] = []
+    for ship_data in data.get("ships", []):
+        s = Ship(
+            name=ship_data.get("name", "Ship"),
+            capacity=ship_data.get("capacity", 10),
+            fuel_range=ship_data.get("fuel_range", 250),
+            travel_speed=ship_data.get("travel_speed", 5),
+        )
+        s.capacity_level = ship_data.get("capacity_level", 1)
+        s.fuel_level = ship_data.get("fuel_level", 1)
+        # support both old "speed_level" and new "travel_speed_level"
+        s.travel_speed_level = ship_data.get(
+            "travel_speed_level",
+            ship_data.get("speed_level", 1),
+        )
+        s.capacity_cost = ship_data.get("capacity_cost", 100)
+        s.fuel_cost = ship_data.get("fuel_cost", 100)
+        s.speed_cost = ship_data.get("speed_cost", 100)
+        s.max_level = ship_data.get("max_level", 10)
+        s.credits = ship_data.get("credits", 0)
+
+        # if ship_cost missing, recompute a sane default
+        s.ship_cost = ship_data.get(
+            "ship_cost",
+            s.capacity * (s.travel_speed + s.fuel_range),
+        )
+
+        ships.append(s)
+
+    # Rebuild Profile (using your existing signature)
+    profile = Profile(
+        data.get("name", ""),
+        data.get("reputation", 1),
+        data.get("tourists", 5),
+        ships[0] if ships else None,
+        data.get("money", 0),
+    )
+
+    # Ensure the full list is on the profile
+    profile.ships = ships
+
+    print(f"\nLoaded save for {profile.name}")
+    return profile
+
     """Let the user pick a save file from save_files/ and return a loaded Profile."""
     files = [f for f in os.listdir("save_files") if f.endswith(".json")]
     if not files:
@@ -117,12 +189,8 @@ def load_save():
         )
         s.capacity_level = ship_data.get("capacity_level", 1)
         s.fuel_level = ship_data.get("fuel_level", 1)
-        s.speed_level = ship_data.get("speed_level", 1)
-        s.capacity_cost = ship_data.get("capacity_cost", 100)
-        s.fuel_cost = ship_data.get("fuel_cost", 100)
-        s.speed_cost = ship_data.get("speed_cost", 100)
+        s.travel_speed_level = ship_data.get("speed_level", 1)
         s.max_level = ship_data.get("max_level", 10)
-        s.credits = ship_data.get("credits", 0)
         s.ship_cost = ship_data.get("ship_cost", 0)
         ships.append(s)
 

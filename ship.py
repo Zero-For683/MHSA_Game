@@ -16,9 +16,10 @@ class Ship:
         self.fuel_range = fuel_range
         self.travel_speed = travel_speed
 
-        self.base_cost = self.ship_cost
+        
 
         self.ship_cost = capacity * (travel_speed + fuel_range)
+        self.base_cost = self.ship_cost
 
         # Upgrade levels
         self.capacity_level = 1 

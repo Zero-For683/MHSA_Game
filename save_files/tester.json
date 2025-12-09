@@ -1,0 +1,23 @@
+{
+    "name": "tester",
+    "reputation": 1,
+    "tourists": 0,
+    "money": 1000,
+    "ships": [
+        {
+            "name": "Starter",
+            "capacity": 20,
+            "fuel_range": 300,
+            "travel_speed": 575,
+            "capacity_level": 1,
+            "fuel_level": 1,
+            "travel_speed_level": 1,
+            "capacity_cost": 100,
+            "fuel_cost": 100,
+            "speed_cost": 100,
+            "max_level": 3,
+            "credits": 0,
+            "ship_cost": 17500
+        }
+    ]
+}
