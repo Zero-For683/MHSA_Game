@@ -14,11 +14,10 @@ from enum import Enum
 
 class Profile:
     class Reputation_Tier(Enum):
-        """RNG Range of the reputation levels"""
-    
-        LOW = (1, 40)
-        MEDIUM = (20, 70)
-        HIGH = (33, 100)
+        """Rep Tier RNG Min,Max Range to determine # tourists attracted to a ship's capacity"""
+        LOW = (10, 40) #25% average
+        MEDIUM = (30, 75) #50% average
+        HIGH = (50, 100) #75% average
 
         @property
         def min_rng(self):
@@ -56,14 +55,16 @@ class Profile:
             self.ships = []
         self.ships.append(ship)
 
-        print(f"Purchased {ship.name} for {cost} credits.")
-        print(f"Remaining credits: {self.money}")
+        print(f"\nPurchased {ship.name} for ${cost:,.2f}")
+        print(f"Remaining Credits: ${self.money:,.2f}\n")
         return True
     
+    
     def get_reputation_level(self):
-        if (self.reputation > 79):
+        """Reputation Level: High = 70~100% , Medium = 25~69%, Low <24%"""
+        if (self.reputation > 70):
             return self.Reputation_Tier.HIGH
-        elif (self.reputation >= 40 and self.reputation <= 79):
+        elif (self.reputation >= 25 and self.reputation <= 69):
             return self.Reputation_Tier.MEDIUM
         else:
             return self.Reputation_Tier.LOW
@@ -76,13 +77,13 @@ class Profile:
         bonus_max_multiplier = 0.0
 
         if self.get_reputation_level().name == 'HIGH':
-            flat_increase = 0.001
-            bonus_max_multiplier = 2
+            flat_increase = 0.25
+            bonus_max_multiplier = 5
         elif self.get_reputation_level().name == 'MEDIUM': 
-            flat_increase = 0.1
+            flat_increase = 0.75
             bonus_max_multiplier = 10
         else: # LOW
-            flat_increase = 0.5
+            flat_increase = 1.25
             bonus_max_multiplier = 25
  
 
@@ -91,7 +92,7 @@ class Profile:
         # REPUTATION GAIN TABLE:
         # LOW: Up to 25% of tourist onboard
         # MEDIUM: Up to 10% of tourist onboard
-        # HIGH: Up to 2% of tourist onboard
+        # HIGH: Up to 5% of tourist onboard
         gain = round(flat_increase + random.uniform(0, bonus_max_multiplier/100 * tourist_count), 2)
         self.reputation = min(self.reputation + gain, 100) # limits the reputation to 100 by using mininum function
         return gain
@@ -106,6 +107,9 @@ class Profile:
 
         
 # The ship attribute will be a list, because I plan on allowing the user to buy multiple ships
-
-player_ship = Ship(name="Starter", capacity=10, fuel_range=250, travel_speed=500)
+player_ship = Ship(name="Starter", capacity=20, fuel_range=300, travel_speed=575)
 user_profile = Profile(name=str(input()), reputation=1, tourists=0, ship=player_ship, money=1000)
+
+#TODO: Ensure default Starter Ship and Profile is uncommented above. Delete debugging lines below.
+# player_ship = Ship(name="DEBUGGER", capacity=200, fuel_range=2500, travel_speed=5000)
+# user_profile = Profile(name=str(input()), reputation=35, tourists=0, ship=player_ship, money=1000000000)

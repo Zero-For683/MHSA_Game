@@ -3,33 +3,40 @@ from ship import Ship
 from user_profile import Profile
 from ascii_animations import *
 import time
+from colorama import *
 
-
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+CYAN = '\033[36m'
+PURPLE = '\033[95m'
+MAGENTA = '\033[35m'
+ENDCOLOR = '\033[0m'
 
 
 def new_player(profile):
     '''Runs to initiate a new save game'''
     build_animation(solar_system)
-    print(f"\n\nI think I see a new player approaching...\n")
-    time.sleep(3)
-    print(f"What is your name my fellow capitalist?")
+    print(f"\n\n{PURPLE}Mostly Harmless Space Agency™ (MHSA){ENDCOLOR}\n{YELLOW}Onboarding Initializing...{ENDCOLOR}\n")
+    time.sleep(2)
+    print(f"> What is your name my fellow capitalist?")
     username = input()
     profile.name = username
-    print(f"I hope you're ready for an exciting adventure {profile.name}...")
+    print(f"\n> Welcome to {PURPLE}MHSA™{ENDCOLOR}, Commander {profile.name}!")
     time.sleep(3)
-    print("\n" * 100)
+    print("\n" * 50)
 
 
     build_animation(saturn)
     print("\n\n\n")
     print("=" * 30, "  TUTORIAL  ", "=" * 30)
-    print(f"We'll give you a spaceship to start off with, free of charge!")
-    print(f"In order to progress, you'll need to take tourists around our solar system!")
-    print(f"Successful expeditions give you cash and reputation")
-    print(f"Reputation attracts more tourists to fill your spaceships on future expeditions!")
-    print(f"Cash can be used to upgrade your spaceship to embark to more exotic planets")
+    print(f"{YELLOW}Commander {username}, we need you to take tourists around our solar system.")
+    print(f"{GREEN}- Successful expeditions give you cash $$$ and reputation.")
+    print(f"- Higher reputation attracts more tourists to fill your spaceships.")
+    print(f"- Cash can be used to upgrade or buy better spaceships.")
+    print(f"- You've been given a basic spaceship to start off with, free of charge!{ENDCOLOR}")
     print("=" * 30, "  TUTORIAL  ", "=" * 30)
-    print("Press any key to continue...")
+    print(f"Press {RED}ENTER{ENDCOLOR} to continue...")
     input()
 
 
