@@ -18,6 +18,8 @@ def main():
     print("\n" * 100)
     profile = user_profile
 
+    # save_file folder will be created where current working directory is. 
+    # Should we consider os.path.abspath(__file__) to get the same path of main.py and use same location to create the save_file folder 
 
     try:
         os.mkdir("save_files")
@@ -39,7 +41,6 @@ def main():
     else:
         # No save files found
         new_player(profile)
-
 
 
 
@@ -67,4 +68,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()

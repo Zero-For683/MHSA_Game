@@ -1,24 +1,34 @@
 import math
-from random import randint
-from ascii_animations import *
+import threading
 import time
+from random import randint
+from typing import Callable
+from ascii_animations import *
 from expedition import Expedition
 from ship import *
 from user_profile import Profile
-import threading
-import time
+from colorama import *
+from save_logic import *
+
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+CYAN = '\033[36m'
+PURPLE = '\033[95m'
+MAGENTA = '\033[35m'
+ENDCOLOR = '\033[0m'
 
 def main_menu(profile):
     """Show the main menu and return the player's choice."""
-    print("\n" * 100)
+    print("\n" * 50)
     build_animation(winter_home)
     print("=" * 30, "  MAIN MENU  ", "=" * 30)
-    print(f"Commander:        {profile.name}")
-    print(f"Money:            {profile.money}")
-    print(f"Reputation:       {profile.reputation}")
+    print(f"{YELLOW}Commander:        {profile.name}{ENDCOLOR}")
+    print(f"{GREEN}Credits:          ${profile.money:,.2f}{ENDCOLOR}")
+    print(f"{CYAN}Reputation:       {profile.reputation:.2f}%{ENDCOLOR}")
     print(f"Tourist Serviced: {profile.tourists}\n\n")
-    print("1) Choose mission")
-    print("2) Upgrade ship")
+    print("1) Choose Mission")
+    print("2) Upgrade Ship")
     print("0) Save & Quit")
     print("=" * 30, "  MAIN MENU  ", "=" * 30)
     choice = input("Choose an option: ")
@@ -40,7 +50,7 @@ def choose_destination():
                 break
             if 1 <= choice <= len(Expedition.all_expeditions):
                 selected_destination = Expedition.all_expeditions[choice - 1]
-                print(f"Destination Selected: {selected_destination.planet_name}")
+                print(f"Destination Selected: {RED}{selected_destination.planet_name}{ENDCOLOR}")
                 return selected_destination
             else:
                 print("Invalid choice. Please enter a valid number.")
@@ -54,12 +64,11 @@ def is_preflight_check_pass(ship, expedition):
         return False
 
     # Simple range check: can this ship make a round trip?
-    if ship.fuel_range * ship.travel_speed < expedition.distance * 2:
+    if (ship.fuel_range * ship.travel_speed) < (expedition.distance * 2):
         print(
             "Your ship isn't strong enough for this expedition. "
-            "Say goodbye to your tourists and prized ship..."
         )
-        # We can add penalties here if we want to for random button mashing
+        input(f"\nPress {RED}ENTER{ENDCOLOR} return to the menu...")
         return False
     return True
 
@@ -77,9 +86,6 @@ def calc_passenger_onboard(profile: Profile, ship: Ship) -> int:
 
 def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
     """Runs the chosen mission asynchronously with a tiny in-terminal animation."""
-
-    import threading
-    import time
 
     # If no destination was actually selected, just bail.
     if expedition is None:
@@ -109,7 +115,7 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
         else:
             print("Mission in progress...")
 
-        input("Press Enter to return to the menu...")
+        input(f"Press {RED}ENTER{ENDCOLOR} return to the menu...")
         return
 
     # Normal preflight check
@@ -119,10 +125,11 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
     # Determine how many passengers board
     tourist_onboard = calc_passenger_onboard(profile, ship)
     print(
-        f"\nBased on your reputation, {tourist_onboard} decided to join this mission. "
-        f"You had {ship.capacity - tourist_onboard} seats left open."
+        f"\nBased on your reputation, {YELLOW}[{tourist_onboard}] tourists joined this expedition{ENDCOLOR}."
+        f" You had {ship.capacity - tourist_onboard} seats left open."
+        
     )
-    input("\nPress Enter to launch the mission... ")
+    input(f"\nPress {RED}ENTER{ENDCOLOR} to launch the mission... ")
 
     # Compute a rough mission duration based on distance and ship speed
     # travel_units grows with distance and shrinks with speed
@@ -135,9 +142,9 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
     ship._mission_destination = expedition.planet_name
     ship._mission_eta = time.time() + mission_duration
 
-    print(f"\nYou order your captain to embark on a journey to {expedition.planet_name} with the tourists!")
-    print(f"{ship.name} will be away for about {mission_duration} seconds (round trip).")
-    print("You can visit the shop or main menu while the mission runs in the background.\n")
+    print(f"\nCommander initiates {expedition.planet_name} expedition for the tourists!")
+    print(f"\t{ship.name} will be away for about {mission_duration} seconds...")
+    print("\tYou can visit the shop or main menu while the mission runs in the background.\n")
 
     def mission_worker():
         spinner = "|/-\\"
@@ -149,7 +156,7 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
             frame = spinner[i % len(spinner)]
             # One-line status that will occasionally interleave with menu output
             print(
-                f"\r[{frame}] {ship.name} en route to {expedition.planet_name} | ETA: {remaining:2d}s ",
+                f"\r{MAGENTA}[{frame}] {ship.name} en route to {expedition.planet_name} | ETA: {remaining:2d}s {ENDCOLOR}",
                 end="",
                 flush=True,
             )
@@ -175,16 +182,15 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
 
         # Final mission summary
         print(f"\n\nMission complete! {ship.name} has returned from {expedition.planet_name}.")
-        print(f"Tourists delivered: {tourist_onboard}")
-        print(f"Rewards:\n  Money:       +{gained_money}\n  Reputation:  +{gained_reputation}\n")
-
+        print(f"Tourists Delivered: {tourist_onboard}")
+        print(f"{YELLOW}Rewards:{ENDCOLOR}\n  {GREEN}Money:       +${gained_money:,.2f}{ENDCOLOR}\n  {CYAN}Reputation:  +{gained_reputation:.2f}%{ENDCOLOR}\n")
+       
     # Start the background mission thread and immediately return control to main loop
     mission_thread = threading.Thread(target=mission_worker, daemon=True)
     ship._mission_thread = mission_thread
     mission_thread.start()
 
-    input("Press Enter to return to the menu while your ship is on mission...")
-
+    input(f"\nPress {RED}ENTER{ENDCOLOR} return to the menu...")
 
 
 
@@ -194,7 +200,7 @@ def open_ship_shop(profile, ship_list):
     while True:
         print("\n" * 50)
         print("=" * 30, "SHIPYARD", "=" * 30)
-        print(f"Your credits: {profile.money}")
+        print(f"Your Credits: {GREEN}${profile.money:,.2f}{ENDCOLOR}")
         print()
 
         for idx, ship in enumerate(ship_list, start=1):
@@ -205,7 +211,7 @@ def open_ship_shop(profile, ship_list):
             print(f"   Capacity:    {ship.capacity}")
             print(f"   Fuel range:  {ship.fuel_range}")
             print(f"   Speed:       {ship.travel_speed}")
-            print(f"   Price:       {ship.ship_cost} credits")
+            print(f"   Price:       {GREEN}${ship.ship_cost:,.2f}{ENDCOLOR}")
             print("-" * 60)
 
         print("0) Leave shipyard")
@@ -216,13 +222,13 @@ def open_ship_shop(profile, ship_list):
 
         if not choice.isdigit():
             print("Please enter a number.")
-            input("Press Enter to continue...")
+            input(f"Press {RED}ENTER{ENDCOLOR} continue...")
             continue
 
         idx = int(choice)
         if not (1 <= idx <= len(ship_list)):
             print("Invalid choice.")
-            input("Press Enter to continue...")
+            input(f"Press {RED}ENTER{ENDCOLOR} continue...")
             continue
 
         selected_ship = ship_list[idx - 1]
@@ -231,7 +237,12 @@ def open_ship_shop(profile, ship_list):
         success = profile.buy_ship(selected_ship)
         if success:
             print(f"{selected_ship.name} has been added to your fleet.")
-        input("Press Enter to continue...")
+        input(f"Press {RED}ENTER{ENDCOLOR} continue...")
+
+
+
+
+
 
 def choose_owned_ship(profile):
     """Let the player pick one of their owned ships. Returns a Ship or None."""
@@ -243,7 +254,7 @@ def choose_owned_ship(profile):
     print("=" * 30, "YOUR FLEET", "=" * 30)
     for i, ship in enumerate(profile.ships, start=1):
         print(f"{i}) {ship.name} "
-              f"(Cap: {ship.capacity}, Fuel: {ship.fuel_range}, Speed: {ship.travel_speed})")
+              f"(Capacity: {ship.capacity}, Fuel: {ship.fuel_range}, Speed: {ship.travel_speed})")
 
     print("0) Cancel")
 
@@ -262,19 +273,22 @@ def choose_owned_ship(profile):
         print("Invalid choice, try again.")
 
 
-def shop_menu(profile, profile_ship):
+
+
+
+def shop_menu(profile: Profile, ship: Ship):
     while True:
         print("\n" * 100)
         build_animation(spaceship)
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30)
 
         print("Which ship component would you like to upgrade?\n")
-        print("1) check your current ship status\n")
-        print("2) upgrade your ships holding capacity")
-        print("3) upgrade your ships fuel range")
-        print("4) upgrade your ships speed")
-        print("5) Buy a new ship")
-        print("\n0) to go back to main menu")
+        print("1) Check This Ship's Current Stats\n")
+        print("2) Upgrade Passenger Capacity")
+        print("3) Upgrade Fuel Range")
+        print("4) Upgrade Speed")
+        print("5) Buy a New Ship")
+        print("\n0) Back to Main Menu")
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30, "\n")
 
         # Safely read input
@@ -291,19 +305,28 @@ def shop_menu(profile, profile_ship):
                 print("Invalid input. Please enter a number.")
                 continue
 
+        # Created a inner function for readability
+        def upgrade_ship(ship_upgrade_cb: Callable[[], None], level: int):
+            """helper function for checking profile money and executing ship upgrade function"""
+            if profile.money >= ship.get_upgrade_cost(level):
+                ship_upgrade_cb()
+                profile.money -= ship.get_upgrade_cost(level)
+                print(f"\n${profile.money:,.2f} Credits Left")
+            else:
+                print("Not enough credits")
+            time.sleep(5)
+
+
         # from here down, your existing logic:
         if pick == 1:
-            profile_ship.check_stats()
+            ship.get_status()
             time.sleep(5)
         elif pick == 2:
-            profile_ship.upgrade_capacity()
-            time.sleep(5)
+            upgrade_ship(ship.upgrade_capacity, ship.capacity_level)
         elif pick == 3:
-            profile_ship.upgrade_fuel()
-            time.sleep(5)
+            upgrade_ship(ship.upgrade_fuel, ship.fuel_level)
         elif pick == 4:
-            profile_ship.upgrade_speed()
-            time.sleep(5)
+            upgrade_ship(ship.upgrade_speed, ship.travel_speed_level)
         elif pick == 5:
             open_ship_shop(profile, ship_shop)
         elif pick == 0:
