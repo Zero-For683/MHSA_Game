@@ -109,7 +109,3 @@ class Profile:
 # The ship attribute will be a list, because I plan on allowing the user to buy multiple ships
 player_ship = Ship(name="Starter", capacity=20, fuel_range=300, travel_speed=575)
 user_profile = Profile(name=str(input()), reputation=1, tourists=0, ship=player_ship, money=1000)
-
-#TODO: Ensure default Starter Ship and Profile is uncommented above. Delete debugging lines below.
-# player_ship = Ship(name="DEBUGGER", capacity=200, fuel_range=2500, travel_speed=5000)
-# user_profile = Profile(name=str(input()), reputation=35, tourists=0, ship=player_ship, money=1000000000)

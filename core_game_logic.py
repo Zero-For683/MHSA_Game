@@ -34,28 +34,74 @@ def main_menu(profile):
     choice = input("Choose an option: ")
     return choice.strip()
 
-def choose_destination():
-    '''When called, you get the option to choose the available missions'''   
+
+def choose_destination(ship: Ship = None):
+    """Let the player choose a destination.
+    If a ship is provided, show whether it can run each mission.
+    """
+
+    def can_reach(expedition: Expedition) -> bool:
+        # same logic as your preflight check, but without printing
+        if ship is None:
+            return True
+        return (ship.fuel_range * ship.travel_speed) >= (expedition.distance * 2)
+
     print("\n" * 100)
     print("=" * 30, "  MISSION SELECTOR  ", "=" * 30)
     build_animation(solar_system_big)
     print("Available Destinations:")
+
     for i, obj in enumerate(Expedition.all_expeditions):
-        print(f"{i + 1}. {obj.planet_name}")
+        if ship is not None:
+            if can_reach(obj):
+                status = f"{GREEN}OK{ENDCOLOR}"
+            else:
+                status = f"{RED}OUT OF RANGE{ENDCOLOR}"
+            print(
+                f"{i + 1}. {obj.planet_name:<15} "
+                f"(Distance: {obj.distance:,}) [{status}]"
+            )
+        else:
+            # Fallback if no ship is passed in
+            print(f"{i + 1}. {obj.planet_name} (Distance: {obj.distance:,})")
 
     while True:
         try:
-            choice = int(input("\nEnter the number of your destination or [0] to return to main menu: "))
+            choice = int(
+                input(
+                    "\nEnter the number of your destination "
+                    "or [0] to return to main menu: "
+                )
+            )
             if choice == 0:
-                break
+                return None
+
             if 1 <= choice <= len(Expedition.all_expeditions):
                 selected_destination = Expedition.all_expeditions[choice - 1]
-                print(f"Destination Selected: {RED}{selected_destination.planet_name}{ENDCOLOR}")
+
+                # If we know the ship, warn if this mission is out of range
+                if ship is not None and not can_reach(selected_destination):
+                    print(
+                        f"{YELLOW}Warning:{ENDCOLOR} "
+                        f"{ship.name} cannot complete a round trip to "
+                        f"{RED}{selected_destination.planet_name}{ENDCOLOR}."
+                    )
+                    ans = input(
+                        "Choose a different destination? "
+                        "[Y to change / Enter to continue anyway]: "
+                    ).strip().lower()
+                    if ans == "y":
+                        continue
+
+                print(
+                    f"Destination Selected: "
+                    f"{RED}{selected_destination.planet_name}{ENDCOLOR}"
+                )
                 return selected_destination
             else:
                 print("Invalid choice. Please enter a valid number.")
         except ValueError:
-            print("Invalid. Please enter a number.")  
+            print("Invalid. Please enter a number.") 
 
 
 def is_preflight_check_pass(ship, expedition):
@@ -71,6 +117,7 @@ def is_preflight_check_pass(ship, expedition):
         input(f"\nPress {RED}ENTER{ENDCOLOR} return to the menu...")
         return False
     return True
+
 
 def calc_passenger_onboard(profile: Profile, ship: Ship) -> int:
     """Determine how many passengers got onboard based on current player's reputation"""
@@ -204,14 +251,12 @@ def run_mission(profile: Profile, ship: Ship, expedition: Expedition):
     print("\r" + " " * 80 + "\r", end="")
 
 
-
 def open_ship_shop(profile, ship_list):
     """Display a ship shop, let the player buy ships from ship_list."""
     while True:
         print("\n" * 50)
         print("=" * 30, "SHIPYARD", "=" * 30)
-        print(f"Your Credits: {GREEN}${profile.money:,.2f}{ENDCOLOR}")
-        print()
+        print(f"{GREEN}Your Credits: ${profile.money:,.2f}{ENDCOLOR}\n")
 
         for idx, ship in enumerate(ship_list, start=1):
             print(f"{idx}) {ship.name}")
@@ -221,7 +266,10 @@ def open_ship_shop(profile, ship_list):
             print(f"   Capacity:    {ship.capacity}")
             print(f"   Fuel range:  {ship.fuel_range}")
             print(f"   Speed:       {ship.travel_speed}")
-            print(f"   Price:       {GREEN}${ship.ship_cost:,.2f}{ENDCOLOR}")
+
+            price = ship.ship_cost
+            price_color = GREEN if profile.money >= price else RED
+            print(f"   Price:       {price_color}${price:,.2f}{ENDCOLOR}")
             print("-" * 60)
 
         print("0) Leave shipyard")
@@ -232,13 +280,13 @@ def open_ship_shop(profile, ship_list):
 
         if not choice.isdigit():
             print("Please enter a number.")
-            input(f"Press {RED}ENTER{ENDCOLOR} continue...")
+            input(f"Press {RED}ENTER{ENDCOLOR} to continue...")
             continue
 
         idx = int(choice)
         if not (1 <= idx <= len(ship_list)):
             print("Invalid choice.")
-            input(f"Press {RED}ENTER{ENDCOLOR} continue...")
+            input(f"Press {RED}ENTER{ENDCOLOR} to continue...")
             continue
 
         selected_ship = ship_list[idx - 1]
@@ -246,8 +294,10 @@ def open_ship_shop(profile, ship_list):
         # Attempt purchase via Profile method
         success = profile.buy_ship(selected_ship)
         if success:
-            print(f"{selected_ship.name} has been added to your fleet.")
-        input(f"Press {RED}ENTER{ENDCOLOR} continue...")
+            print(f"{GREEN}{selected_ship.name} has been added to your fleet.{ENDCOLOR}")
+            print(f"{GREEN}Credits remaining: ${profile.money:,.2f}{ENDCOLOR}")
+        input(f"Press {RED}ENTER{ENDCOLOR} to continue...")
+
 
 
 def choose_owned_ship(profile):
@@ -285,11 +335,37 @@ def shop_menu(profile: Profile, ship: Ship):
         build_animation(spaceship)
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30)
 
+        # --- Ship header + current stats ---
+        print(f"{YELLOW}Upgrading Ship: {CYAN}{ship.name}{ENDCOLOR}")
+        print(f"  Capacity: {ship.capacity}  "
+              f"(Lvl {ship.capacity_level}/{ship.max_level})")
+        print(f"  Fuel:     {ship.fuel_range}  "
+              f"(Lvl {ship.fuel_level}/{ship.max_level})")
+        print(f"  Speed:    {ship.travel_speed}  "
+              f"(Lvl {ship.travel_speed_level}/{ship.max_level})")
+        print(f"{GREEN}Credits:  ${profile.money:,.2f}{ENDCOLOR}\n")
+
+        # --- Helper for price + color based on affordability / maxed ---
+        def price_and_color(level: int) -> tuple[str, str]:
+            if level > ship.max_level:
+                return "MAX", YELLOW
+            cost = ship.get_upgrade_cost(level)
+            colour = GREEN if profile.money >= cost else RED
+            return f"${cost:,.2f}", colour
+
+        cap_price, cap_col = price_and_color(ship.capacity_level)
+        fuel_price, fuel_col = price_and_color(ship.fuel_level)
+        spd_price, spd_col = price_and_color(ship.travel_speed_level)
+
+        # --- Menu with prices ---
         print("Which ship component would you like to upgrade?\n")
         print("1) Check This Ship's Current Stats\n")
-        print("2) Upgrade Passenger Capacity")
-        print("3) Upgrade Fuel Range")
-        print("4) Upgrade Speed")
+        print(f"2) Upgrade Passenger Capacity  "
+              f"[{cap_col}{cap_price}{ENDCOLOR}]")
+        print(f"3) Upgrade Fuel Range          "
+              f"[{fuel_col}{fuel_price}{ENDCOLOR}]")
+        print(f"4) Upgrade Speed               "
+              f"[{spd_col}{spd_price}{ENDCOLOR}]")
         print("5) Buy a New Ship")
         print("\n0) Back to Main Menu")
         print("=" * 30, "  SHIP UPGRADE MENU  ", "=" * 30, "\n")
@@ -298,7 +374,6 @@ def shop_menu(profile: Profile, ship: Ship):
         while True:
             choice_str = input("Pick an option: ").strip()
             if choice_str == "":
-                # Treat blank enter as "do nothing, re-show prompt"
                 print("Please enter a number from the menu.")
                 continue
             try:
@@ -308,19 +383,23 @@ def shop_menu(profile: Profile, ship: Ship):
                 print("Invalid input. Please enter a number.")
                 continue
 
-        # Created a inner function for readability
+        # Helper for actually performing an upgrade + credit check
         def upgrade_ship(ship_upgrade_cb: Callable[[], None], level: int):
-            """helper function for checking profile money and executing ship upgrade function"""
-            if profile.money >= ship.get_upgrade_cost(level):
+            if level > ship.max_level:
+                print(f"{YELLOW}That stat is already maxed!{ENDCOLOR}")
+                time.sleep(2)
+                return
+
+            cost = ship.get_upgrade_cost(level)
+            if profile.money >= cost:
                 ship_upgrade_cb()
-                profile.money -= ship.get_upgrade_cost(level)
-                print(f"\n${profile.money:,.2f} Credits Left")
+                profile.money -= cost
+                print(f"\n{GREEN}Credits left: ${profile.money:,.2f}{ENDCOLOR}")
             else:
-                print("Not enough credits")
+                print(f"{RED}Not enough credits for this upgrade.{ENDCOLOR}")
             time.sleep(5)
 
-
-        # from here down, your existing logic:
+        # --- Option handling ---
         if pick == 1:
             ship.get_status()
             time.sleep(5)
@@ -336,3 +415,8 @@ def shop_menu(profile: Profile, ship: Ship):
             break
         else:
             print("Invalid option BOZO. Pick again")
+            time.sleep(2)
+
+
+
+

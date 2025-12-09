@@ -1,3 +1,15 @@
+#############################################################################################
+'''
+YOU CAN INSTALL THIS AT GITHUB:
+https://github.com/Zero-For683/MHSA_Game
+
+'''
+
+
+
+
+
+
 from user_profile import user_profile, Profile
 from ship import Ship
 from expedition import *
@@ -17,9 +29,6 @@ import json
 def main():
     print("\n" * 100)
     profile = user_profile
-
-    # save_file folder will be created where current working directory is. 
-    # Should we consider os.path.abspath(__file__) to get the same path of main.py and use same location to create the save_file folder 
 
     try:
         os.mkdir("save_files")
@@ -53,7 +62,7 @@ def main():
         if choice == "1":
             choose_ship = choose_owned_ship(profile)
             if choose_ship is not None:
-                expedition = choose_destination()
+                expedition = choose_destination(choose_ship)
                 run_mission(profile, choose_ship, expedition)
         elif choice == "2":
             ship_to_upgrade = choose_owned_ship(profile)
