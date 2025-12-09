@@ -12,18 +12,18 @@ class Expedition:
     
     def __init__(self, planet_name, distance):
            self.planet_name = planet_name
-           self.distance = distance #in MH™ Distance Units (Earth to Destination in AU x 100,000)
+           self.distance = distance #in MH™ Distance Units (Earth to Destination in AU x 200,000)
            Expedition.all_expeditions.append(self)
            
     def __str__(self):
         return f" {self.planet_name}"
     
-moon = Expedition(planet_name="Moon", distance=250)
-venus = Expedition(planet_name="Venus", distance=28000)
-mars = Expedition(planet_name="Mars", distance=52000)
-mercury = Expedition(planet_name="Mercury", distance=61000)
-asteroid_belt = Expedition(planet_name="Asteroid Belt", distance=150000)
-jupiter = Expedition(planet_name="Jupiter", distance=420000)
-saturn = Expedition(planet_name="Saturn", distance=852000)
-uranus = Expedition(planet_name="Uranus", distance=1802000)
-neptune = Expedition(planet_name="Neptune", distance=2900000)
+moon = Expedition(planet_name="Moon", distance=500)
+venus = Expedition(planet_name="Venus", distance=56000)
+mars = Expedition(planet_name="Mars", distance=104000)
+mercury = Expedition(planet_name="Mercury", distance=122000)
+asteroid_belt = Expedition(planet_name="Asteroid Belt", distance=300000)
+jupiter = Expedition(planet_name="Jupiter", distance=840000)
+saturn = Expedition(planet_name="Saturn", distance=1704000)
+uranus = Expedition(planet_name="Uranus", distance=3604000)
+neptune = Expedition(planet_name="Neptune", distance=5800000)
